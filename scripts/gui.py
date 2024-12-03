@@ -1,23 +1,8 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QMessageBox, QVBoxLayout, QHBoxLayout, QWidget, QTextEdit, QListWidget, QListWidgetItem, QAbstractItemView
-import sys
-
-class NumberOfQuestions:
-    choices = [5, 10, 15, 20]
-
-class DifficultyLevel:
-    choices = ["easy", "medium", "hard"]
-
-class Category:
-    choices = ["numerical reasoning", "verbal reasoning", "situational judgment"]
-
-class Format:
-    choices = ["multiple-choice", "fill-in-the-blank", "true/false"]
-
-class Customization:
-    features = [NumberOfQuestions, DifficultyLevel, Category, Format]
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QMessageBox, QVBoxLayout, QHBoxLayout, QWidget, QListWidget, QListWidgetItem, QAbstractItemView
+from .constants import Customization
 
 class MainWindow(QMainWindow, Customization):
-    number_of_questions_selected = False
+    questions_selected = False
     difficulty_level_selected = False
     category_selected = False
     format_selected = False
@@ -33,11 +18,11 @@ class MainWindow(QMainWindow, Customization):
         category_label = QLabel("Choose a category")
         format_label = QLabel("Choose a format")
 
-        number_of_questions = self.__create_selection(0)
-        number_of_questions.currentRowChanged.connect(lambda : self.number_of_questions_triggered(number_of_questions))
+        questions = self.__create_selection(0)
+        questions.currentRowChanged.connect(lambda : self.questions_triggered(questions))
         
         difficulty_level = self.__create_selection(1)
-        difficulty_level.currentRowChanged.connect(lambda : self.difficulty_level_triggered(difficulty_level))
+        difficulty_level.currentRowChanged.connect(lambda : self.difficulty_triggered(difficulty_level))
 
         category = self.__create_selection(2)
         category.currentRowChanged.connect(lambda : self.category_triggered(category))
@@ -46,26 +31,14 @@ class MainWindow(QMainWindow, Customization):
         format.currentRowChanged.connect(lambda x: self.format_triggered(format))
 
         button = QPushButton("Button")
-        button.clicked.connect(lambda : self.button_triggered(number_of_questions, difficulty_level, category, format))
+        button.clicked.connect(lambda : self.button_triggered(questions, difficulty_level, category, format))
         
-        layout_left = QVBoxLayout()
-        layout_right = QVBoxLayout()
-        layout_top = QHBoxLayout()
-        layout_bottom = QHBoxLayout()
-        layout_final = QVBoxLayout()
-        
-        layout_left.addWidget(questions_label)
-        layout_left.addWidget(number_of_questions)
-        layout_left.addWidget(difficulty_label)
-        layout_left.addWidget(difficulty_level)
-        layout_right.addWidget(category_label)
-        layout_right.addWidget(category)
-        layout_right.addWidget(format_label)
-        layout_right.addWidget(format)
-        layout_bottom.addWidget(button)
+        layout_right = self.__construct_right_layout(category_label, category, format_label, format)
+        layout_left = self.__construct_left_layout(questions_label, questions, difficulty_label, difficulty_level)
+        layout_top = self.__construct_top_layout(layout_left, layout_right)
+        layout_bottom = self.__construct_bottom_layout(button)
 
-        layout_top.addLayout(layout_left)
-        layout_top.addLayout(layout_right)
+        layout_final = QVBoxLayout()
         layout_final.addLayout(layout_top)
         layout_final.addLayout(layout_bottom)
 
@@ -73,10 +46,38 @@ class MainWindow(QMainWindow, Customization):
         widget.setLayout(layout_final)
         self.setCentralWidget(widget)
     
-    def button_triggered(self, number_of_questions, difficulty_level, category, format):
+    def __construct_right_layout(self, category_label, category, format_label, format):
+        layout_right = QVBoxLayout()
+        layout_right.addWidget(category_label)
+        layout_right.addWidget(category)
+        layout_right.addWidget(format_label)
+        layout_right.addWidget(format)
+        return layout_right
+
+    def __construct_left_layout(self, questions_label, questions, difficulty_label, difficulty_level):
+        layout_left = QVBoxLayout()
+        layout_left.addWidget(questions_label)
+        layout_left.addWidget(questions)
+        layout_left.addWidget(difficulty_label)
+        layout_left.addWidget(difficulty_level)
+        return layout_left
+    
+    def __construct_top_layout(self, layout_left, layout_right):
+        layout_top = QHBoxLayout()
+        layout_top.addLayout(layout_left)
+        layout_top.addLayout(layout_right)
+        return layout_top
+
+    def __construct_bottom_layout(self, button):
+        layout_bottom = QHBoxLayout()
+        layout_bottom.addWidget(button)
+        return layout_bottom
+
+
+    def button_triggered(self, questions, difficulty_level, category, format):
         self.run = True
         message = ""
-        if not self.number_of_questions_selected:
+        if not self.questions_selected:
             sentence = "Please, choose the number of questions\n"
             message = message + sentence
             self.run = False
@@ -98,7 +99,7 @@ class MainWindow(QMainWindow, Customization):
 
         if self.run:
             choices = self.features[0].choices
-            n_questions_value = choices[number_of_questions.currentRow()]
+            n_questions_value = choices[questions.currentRow()]
 
             choices = self.features[1].choices
             difficulty_value = choices[difficulty_level.currentRow()]
@@ -115,7 +116,7 @@ class MainWindow(QMainWindow, Customization):
                 category_value,
                 format_value)
             
-            number_of_questions.setCurrentRow(-1)
+            questions.setCurrentRow(-1)
             difficulty_level.setCurrentRow(-1)
             category.setCurrentRow(-1)
             format.setCurrentRow(-1)
@@ -127,7 +128,7 @@ class MainWindow(QMainWindow, Customization):
 
         if self.run:
             self.run_model()
-            self.number_of_questions_selected = False
+            self.questions_selected = False
             self.difficulty_level_selected = False
             self.category_selected = False
             self.format_selected = False
@@ -144,11 +145,11 @@ class MainWindow(QMainWindow, Customization):
         self.__upload_items(selection, idx)
         return selection
     
-    def number_of_questions_triggered(self, selection):
+    def questions_triggered(self, selection):
         if selection.currentRow() != -1:
-            self.number_of_questions_selected = True
+            self.questions_selected = True
 
-    def difficulty_level_triggered(self, selection):
+    def difficulty_triggered(self, selection):
         if selection.currentRow() != -1:
             self.difficulty_level_selected = True
 
@@ -163,8 +164,3 @@ class MainWindow(QMainWindow, Customization):
     def run_model(self):
         print("There you go")
 
-
-app = QApplication(sys.argv)
-window = MainWindow()
-window.show()
-app.exec()
