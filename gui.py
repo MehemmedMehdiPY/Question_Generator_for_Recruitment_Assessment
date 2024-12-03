@@ -1,6 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QMessageBox, QVBoxLayout, QWidget, QTextEdit, QListWidget, QListWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QMessageBox, QVBoxLayout, QHBoxLayout, QWidget, QTextEdit, QListWidget, QListWidgetItem, QAbstractItemView
 import sys
-
 
 class NumberOfQuestions:
     choices = [5, 10, 15, 20]
@@ -49,20 +48,29 @@ class MainWindow(QMainWindow, Customization):
         button = QPushButton("Button")
         button.clicked.connect(lambda : self.button_triggered(number_of_questions, difficulty_level, category, format))
         
-        layout = QVBoxLayout()
-        layout.addWidget(questions_label)
-        layout.addWidget(number_of_questions)
-        layout.addWidget(difficulty_label)
-        layout.addWidget(difficulty_level)
-        layout.addWidget(category_label)
-        layout.addWidget(category)
-        layout.addWidget(format_label)
-        layout.addWidget(format)
-        layout.addWidget(button)
+        layout_left = QVBoxLayout()
+        layout_right = QVBoxLayout()
+        layout_top = QHBoxLayout()
+        layout_bottom = QHBoxLayout()
+        layout_final = QVBoxLayout()
+        
+        layout_left.addWidget(questions_label)
+        layout_left.addWidget(number_of_questions)
+        layout_left.addWidget(difficulty_label)
+        layout_left.addWidget(difficulty_level)
+        layout_right.addWidget(category_label)
+        layout_right.addWidget(category)
+        layout_right.addWidget(format_label)
+        layout_right.addWidget(format)
+        layout_bottom.addWidget(button)
+
+        layout_top.addLayout(layout_left)
+        layout_top.addLayout(layout_right)
+        layout_final.addLayout(layout_top)
+        layout_final.addLayout(layout_bottom)
 
         widget = QWidget()
-        widget.setLayout(layout)
-
+        widget.setLayout(layout_final)
         self.setCentralWidget(widget)
     
     def button_triggered(self, number_of_questions, difficulty_level, category, format):
