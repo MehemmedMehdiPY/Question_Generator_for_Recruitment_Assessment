@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QMessageBox, QVBoxLayout, QHBoxLayout, QWidget, QListWidget, QListWidgetItem, QAbstractItemView
 from .constants import Customization
+from .prompt_processing import ModelProcessor, prompt_generator
 
 class MainWindow(QMainWindow, Customization):
     questions_selected = False
@@ -7,8 +8,11 @@ class MainWindow(QMainWindow, Customization):
     category_selected = False
     format_selected = False
 
-    def __init__(self):
+    def __init__(self, max_tokenizer: int = 128):
         super().__init__()
+
+        # Initalizing processor object to execute Llama model
+        self.__initialize_model(max_tokenizer=max_tokenizer)
 
         self.setWindowTitle("App")
         self.setGeometry(700, 200, 400, 600)
@@ -72,7 +76,9 @@ class MainWindow(QMainWindow, Customization):
         layout_bottom = QHBoxLayout()
         layout_bottom.addWidget(button)
         return layout_bottom
-
+    
+    def __initialize_model(self, max_tokenizer: int = 128):
+        self.processor = ModelProcessor(max_tokenizer=max_tokenizer)
 
     def button_triggered(self, questions, difficulty_level, category, format):
         self.run = True
@@ -99,7 +105,7 @@ class MainWindow(QMainWindow, Customization):
 
         if self.run:
             choices = self.features[0].choices
-            n_questions_value = choices[questions.currentRow()]
+            questions_value = choices[questions.currentRow()]
 
             choices = self.features[1].choices
             difficulty_value = choices[difficulty_level.currentRow()]
@@ -111,27 +117,36 @@ class MainWindow(QMainWindow, Customization):
             format_value = choices[format.currentRow()]
 
             message = "Model started processing on {} questions, {} difficulty level, {} category, and {} format".format(
-                n_questions_value, 
+                questions_value, 
                 difficulty_value, 
                 category_value,
                 format_value)
+            print(message)
             
             questions.setCurrentRow(-1)
             difficulty_level.setCurrentRow(-1)
             category.setCurrentRow(-1)
             format.setCurrentRow(-1)
-
-        message_box = QMessageBox()
-        message_box.setText(message)
-        message_box.setGeometry(800, 500, 500, 500)
-        message_box.exec_()
+            
+            message = ""
+        
+        if message:
+            message_box = QMessageBox()
+            message_box.setText(message)
+            message_box.setGeometry(800, 500, 500, 500)
+            message_box.exec_()
 
         if self.run:
-            self.run_model()
+            response = self.run_model(questions_value, difficulty_value, category_value, format_value)
             self.questions_selected = False
             self.difficulty_level_selected = False
             self.category_selected = False
             self.format_selected = False
+
+            message_box = QMessageBox()
+            message_box.setText(response[0]['generated_text'])
+            message_box.setGeometry(800, 500, 500, 500)
+            message_box.exec_()
 
     def __upload_items(self, selection, idx):
         for choice in self.features[idx].choices:
@@ -161,6 +176,11 @@ class MainWindow(QMainWindow, Customization):
         if selection.currentRow() != -1:
             self.format_selected = True
 
-    def run_model(self):
-        print("There you go")
-
+    def run_model(self, questions_value, difficulty_value, category_value, format_value):
+        prompt = prompt_generator(
+            questions=questions_value, 
+            difficulty=difficulty_value, 
+            category=category_value, 
+            format=format_value)
+        response = self.processor.run(prompt)
+        return response
