@@ -14,7 +14,7 @@ class MainWindow(QMainWindow, Customization):
         # Initalizing processor object to execute Llama model
         self.__initialize_model(max_tokenizer=max_tokenizer)
 
-        self.setWindowTitle("App")
+        self.setWindowTitle("BUILT WITH META LLAMA 3")
         self.setGeometry(700, 200, 400, 600)
 
         questions_label = QLabel("Choose the number of questions")
