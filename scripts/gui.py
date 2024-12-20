@@ -8,11 +8,11 @@ class MainWindow(QMainWindow, Customization):
     category_selected = False
     format_selected = False
 
-    def __init__(self, max_tokenizer: int = 128):
+    def __init__(self, max_tokens: int = 128):
         super().__init__()
 
         # Initalizing processor object to execute Llama model
-        self.__initialize_model(max_tokenizer=max_tokenizer)
+        self.__initialize_model(max_tokens=max_tokens)
 
         self.setWindowTitle("BUILT WITH META LLAMA 3")
         self.setGeometry(700, 200, 400, 600)
@@ -77,8 +77,8 @@ class MainWindow(QMainWindow, Customization):
         layout_bottom.addWidget(button)
         return layout_bottom
     
-    def __initialize_model(self, max_tokenizer: int = 128):
-        self.processor = ModelProcessor(max_tokenizer=max_tokenizer)
+    def __initialize_model(self, max_tokens: int = 128):
+        self.processor = ModelProcessor(max_tokens=max_tokens)
 
     def button_triggered(self, questions, difficulty_level, category, format):
         self.run = True
@@ -144,7 +144,7 @@ class MainWindow(QMainWindow, Customization):
             self.format_selected = False
 
             message_box = QMessageBox()
-            message_box.setText(response[0]['generated_text'])
+            message_box.setText(response)
             message_box.setGeometry(800, 500, 500, 500)
             message_box.exec_()
 

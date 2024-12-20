@@ -1,42 +1,29 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
+from transformers import LlamaTokenizer, LlamaForCausalLM
 
 class ModelProcessor():
-    def __init__(self, max_tokenizer: int = 128):
-        self.model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+    def __init__(self, max_tokens: int = 128):
+        self.model_path = 'mtgv/MobileLLaMA-1.4B-Chat'
 
-        self.bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.bfloat16
-            )
-        self.max_tokenizer = max_tokenizer
+        self.tokenizer = LlamaTokenizer.from_pretrained(self.model_path)
+        self.model = LlamaForCausalLM.from_pretrained(
+            self.model_path, torch_dtype=torch.float16, device_map='auto',
+        )
+        self.max_tokens = max_tokens
 
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
-        self.tokenizer.pad_token = self.tokenizer.eos_token
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_id,
-            quantization_config=self.bnb_config,
-            device_map="auto"
-            )
+    def update_max_tokens(self, max_tokens: int):
+        self.max_tokens = max_tokens
         self.__set_pipeline()
-
-    def update_max_tokenizer(self, max_tokenizer):
-        self.max_tokenizer = max_tokenizer
-        self.__set_pipeline()
-    
-    def __set_pipeline(self):
-        self.pipe = pipeline(
-            "text-generation",
-            model=self.model,
-            tokenizer=self.tokenizer,
-            max_new_tokens=self.max_tokenizer
-                )
         
     def run(self, prompt):
-        return self.pipe(prompt)
-        
+        input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids
+        input_ids = input_ids.to('cuda')
+        generation_output = self.model.generate(
+            input_ids=input_ids, max_new_tokens=self.max_tokens
+            )
+        response = self.tokenizer.decode(generation_output[0])
+        return response
+    
 def prompt_generator(questions: str, difficulty: str, category: str, format: str):
     prompt_template = "I need your assistance through an interview. As an interviewer, I have to ask some questions from candidates. Please, customize sample questions based on the followng critera:\n\t\
 1) There must be {} questions\n\t\
@@ -52,8 +39,8 @@ def prompt_generator(questions: str, difficulty: str, category: str, format: str
             )
 
 if __name__ == "__main__":
-    processor = ModelProcessor(max_tokenizer=128)
+    processor = ModelProcessor(max_tokens=128)
     prompt = prompt_generator(questions=10, difficulty="easy", category="verbal reasoning", format="multiple-choice")
     print(prompt)
     response = processor.run(prompt)
-    print(response[0]['generated_text'])
+    print(response)
