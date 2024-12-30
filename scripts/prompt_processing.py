@@ -13,7 +13,6 @@ class ModelProcessor():
 
     def update_max_tokens(self, max_tokens: int):
         self.max_tokens = max_tokens
-        self.__set_pipeline()
         
     def run(self, prompt):
         input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids
@@ -22,6 +21,7 @@ class ModelProcessor():
             input_ids=input_ids, max_new_tokens=self.max_tokens
             )
         response = self.tokenizer.decode(generation_output[0])
+        response = response[3:]
         return response
     
 def prompt_generator(questions: str, difficulty: str, category: str, format: str):

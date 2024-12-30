@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QMessageBox, QVBoxLayout, QHBoxLayout, QWidget, QListWidget, QListWidgetItem, QAbstractItemView
 from .constants import Customization
 from .prompt_processing import ModelProcessor, prompt_generator
+from .writer import text_to_pdf
 
 class MainWindow(QMainWindow, Customization):
     questions_selected = False
@@ -138,15 +139,12 @@ class MainWindow(QMainWindow, Customization):
 
         if self.run:
             response = self.run_model(questions_value, difficulty_value, category_value, format_value)
+            text_to_pdf(response)
+            
             self.questions_selected = False
             self.difficulty_level_selected = False
             self.category_selected = False
             self.format_selected = False
-
-            message_box = QMessageBox()
-            message_box.setText(response)
-            message_box.setGeometry(800, 500, 500, 500)
-            message_box.exec_()
 
     def __upload_items(self, selection, idx):
         for choice in self.features[idx].choices:
