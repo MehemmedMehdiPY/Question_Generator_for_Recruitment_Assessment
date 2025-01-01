@@ -15,7 +15,7 @@ class MainWindow(QMainWindow, Customization):
         # Initalizing processor object to execute Llama model
         self.__initialize_model(max_tokens=max_tokens)
 
-        self.setWindowTitle("Mobile LLaMa")
+        self.setWindowTitle("GPT-2")
         self.setGeometry(700, 200, 400, 600)
 
         questions_label = QLabel("Choose the number of questions")
@@ -132,10 +132,7 @@ class MainWindow(QMainWindow, Customization):
             message = ""
         
         if message:
-            message_box = QMessageBox()
-            message_box.setText(message)
-            message_box.setGeometry(800, 500, 500, 500)
-            message_box.exec_()
+            self.show_message(message)
 
         if self.run:
             response = self.run_model(questions_value, difficulty_value, category_value, format_value)
@@ -145,6 +142,8 @@ class MainWindow(QMainWindow, Customization):
             self.difficulty_level_selected = False
             self.category_selected = False
             self.format_selected = False
+
+            self.show_message("Done!")
 
     def __upload_items(self, selection, idx):
         for choice in self.features[idx].choices:
@@ -182,3 +181,9 @@ class MainWindow(QMainWindow, Customization):
             format=format_value)
         response = self.processor.run(prompt)
         return response
+
+    def show_message(self, message):
+        message_box = QMessageBox()
+        message_box.setText(message)
+        message_box.setGeometry(800, 500, 500, 500)
+        message_box.exec_()
