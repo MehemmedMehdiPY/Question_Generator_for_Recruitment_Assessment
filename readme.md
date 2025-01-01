@@ -28,9 +28,9 @@ window.show()
 app.exec()
 ~~~
 
-MainWindow is a class to handle user interface and expects the maximum number of tokens as a limitation for the output of the model. The user interfaces takes the input of easily customizable parameters, such as the number of questions, difficulty level, topic, and question format. These parameters are further used to create a prompt in a rule-based way. The prompt supervises the model to generate sample interview questions based on the user-requested parameters.
+**MainWindow** is a class to handle user interface and expects the maximum number of tokens as a limitation for the output of the model. The user interfaces takes the input of easily customizable parameters, such as *the number of questions*, *difficulty level*, *topic*, and *question format*. These parameters are further used to create a prompt in a rule-based way. The prompt supervises the model to generate sample interview questions based on the user-requested parameters.
 
-The generated output by the model is saved as ./output/output.pdf - output.pdf file in a folder named as output. The folder is automatically created when the application starts and output.pdf is saved when the model output is available. Make sure generated files are saved safely in different filenames/folders so that they would not be overwritten by the next output of the model. 
+The generated output by the model is saved as **./output/output.pdf** - **output.pdf** file in a folder named as **output**. The folder is automatically created when the application starts and output.pdf is saved when the model output is available. Make sure generated files are saved safely in different filenames/folders so that they would not be overwritten by the next output of the model. 
 
 During the initial running, [HuggingFace](https://huggingface.co/) will automatically download the required Language Model - OpenAI GPT-2. When everything is well-set-up, the application can easily be used
 
