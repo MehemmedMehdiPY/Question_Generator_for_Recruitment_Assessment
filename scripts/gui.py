@@ -81,6 +81,18 @@ class MainWindow(QMainWindow, Customization):
     def __initialize_model(self, max_tokens: int = 128):
         self.processor = ModelProcessor(max_tokens=max_tokens)
 
+    def __upload_items(self, selection, idx):
+        for choice in self.features[idx].choices:
+            item = QListWidgetItem(str(choice))
+            selection.addItem(item)
+
+    def __create_selection(self, idx):
+        selection = QListWidget()
+        selection.setSelectionMode(QAbstractItemView.NoSelection)
+        selection.setGeometry(700, 900, 100, 200)
+        self.__upload_items(selection, idx)
+        return selection
+    
     def button_triggered(self, questions, difficulty_level, category, format):
         self.run = True
         message = ""
@@ -145,18 +157,6 @@ class MainWindow(QMainWindow, Customization):
 
             self.show_message("Done!")
 
-    def __upload_items(self, selection, idx):
-        for choice in self.features[idx].choices:
-            item = QListWidgetItem(str(choice))
-            selection.addItem(item)
-
-    def __create_selection(self, idx):
-        selection = QListWidget()
-        selection.setSelectionMode(QAbstractItemView.NoSelection)
-        selection.setGeometry(700, 900, 100, 200)
-        self.__upload_items(selection, idx)
-        return selection
-    
     def questions_triggered(self, selection):
         if selection.currentRow() != -1:
             self.questions_selected = True
